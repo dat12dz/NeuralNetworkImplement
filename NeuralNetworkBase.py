@@ -34,3 +34,6 @@ class NeuralNetworkBase(ABC):
     @abstractmethod
     def GetPredictResult(self):
         pass
+    @abstractmethod
+    def CalcFinalBiasAndApply():
+        pass

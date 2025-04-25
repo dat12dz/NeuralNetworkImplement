@@ -1,15 +1,20 @@
 import NeuralClassT as n
 import mathFunction
 from NeuralNetworkBase import NeuralNetworkBase
-
+import WeightPool
 import NeuralConst
-learningRate = 1
+import numpy as np
+import WeightPool
+learningRate = 0.04
 class NeuralNetwork(NeuralNetworkBase):
-    
     #init class với mảng độ dài cuiar layer
     def __init__(self,LayerLengthList : list[float],activation):
         self.NeuralNetworkList : list[list[n.Neural]] = []
         # Lặp qua từng mảng layer
+        arr0 = [[np.float32(0) for i in range(layerLen)] for layerLen in LayerLengthList]
+        WeightPool.finalWeightChange = [[[] for i in range(layerLen)] for layerLen in LayerLengthList]
+        WeightPool.finalBiasChange = arr0
+
         for i in range(0,len(LayerLengthList)):
             # thêm vào mảng neron N phần tử trống
             self.NeuralNetworkList.append([n.Neural(0,0.01,i,j,activation[i]) for j in range(LayerLengthList[i])])
@@ -26,6 +31,7 @@ class NeuralNetwork(NeuralNetworkBase):
             for thisNeural  in self.NeuralNetworkList[thisLayerID]:
                     #Linking Prev Layer với Neuron ở layer hiện tại
                     thisNeural.SetprevNeural([PrevNeuron for PrevNeuron in self.NeuralNetworkList[prevLayerID]])
+
 #                    thisNeural.RandomWeight(4)    
         
     # Init class với mảng bias
@@ -86,21 +92,38 @@ class NeuralNetwork(NeuralNetworkBase):
                 print(f"Weight of Layer {LayerID} and Neural {NeuralID} : {self.NeuralNetworkList[LayerID][NeuralID].DeltaValPerDeltaCost}")
     # Train data nhờ việc predict xong Backprop sử dụng kết quả của predict
     def train(self,dataset):
+        n = len(dataset)
+        if (n == 0):
+           return {'b' : [] , 'w' : []}
         totalError = 0.0
-        numberOfPreditcion = 0
+
         for dataSample in dataset:
             self.Predict(dataSample.img)
             error =  mathFunction.Error(dataSample.lable,self.NeuralNetworkList[self.LayerLen - 1])
             totalError += error
             self.BackPropNeuron(dataSample.lable)
-            numberOfPreditcion+=1
         # in ra lỗi sau khi Backprop xong
-        print(f"Total error: {totalError / numberOfPreditcion}")
+        print(f"Total error: {totalError / n}")
         # tính tổng 
         for layerID in range(1,len(self.NeuralNetworkList)):
             for Neuron in self.NeuralNetworkList[layerID]:
                 Neuron.WeightAvg()
+        if (WeightPool.UsingMutilProcess):
+            return { "b" :  WeightPool.finalBiasChange , "w" : WeightPool.finalWeightChange }
+        else:
+            return {}
 
+    def CalcFinalBiasAndApply(self,allBiasChange,allWeightChange):
+        for k in range(len(allBiasChange)):
+            if (len(allBiasChange[k]) != 0):
+                for i in range(0,self.LayerLen):
+                    for j in range(0,len(self.NeuralNetworkList[i])):
+                        thisNeural = self.NeuralNetworkList[i][j]
+                        thisNeural.bias -= allBiasChange[k][i][j]
+                        for LayerWeight in range(len(thisNeural.wList)):
+                            thisNeural.wList[LayerWeight] -= allWeightChange[k][i][j][LayerWeight]
+
+    
     def GetPredictResult(self):
         max = 0.0
         maxi = 0

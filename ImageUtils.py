@@ -2,7 +2,7 @@ import os
 import numpy as np
 from PIL import Image
 
-def load_handwritten_digits_dataset(folder_path, image_size=(32, 32), max_images=100):
+def load_handwritten_digits_dataset(folder_path, image_size=(32, 32), max_images=300):
     dataset = {}
 
     # Loop through each digit folder
@@ -78,23 +78,17 @@ class ImageLable:
     def __init__(self,lable,img):
         self.lable = lable
         self.img = img
-    def Display(self):
-        fig = plt.figure()
-
-# Set the window title
-        print(self.img)
-        displayImg = np.stack((self.img,)*3, axis=-1)
-        fig.canvas.manager.set_window_title(str(self.lable))
-        plt.imshow(displayImg, cmap='gray', vmin=0, vmax=1)
-        plt.axis('off')  # Hide the axis
-        plt.show()
 
     def Display(self):
         fig = plt.figure()
-
-# Set the window title
-        print(self.img)
-        displayImg = np.stack((self.img,)*3, axis=-1)
+        displayImg = []
+        pixelArr = []
+        for i in range(0,len(self.img)):
+            if (i % 32 == 0 and i != 0):
+                displayImg.append(pixelArr)
+                pixelArr = []
+            pixelArr.append(self.img[i])
+        displayImg = np.stack((displayImg,)*3, axis=-1)
         fig.canvas.manager.set_window_title(str(self.lable))
         plt.imshow(displayImg, cmap='gray', vmin=0, vmax=1)
         plt.axis('off')  # Hide the axis

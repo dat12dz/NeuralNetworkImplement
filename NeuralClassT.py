@@ -4,8 +4,9 @@ import random
 import math
 import NeuralNetwork
 import NeuralConst
-
+import WeightPool
 class Neural:
+    
     def __init__(self,val = 0.0,b = 0.0,layer = 0,id = 0,activation = 0):
         self.val = val 
         self.prevNeural : list[Neural] = []
@@ -37,8 +38,11 @@ class Neural:
         self.prevNeural = arr
         if (self.layer != 0):
             self.wList = [np.random.normal(0, np.sqrt(2 / len(arr)))  for i in arr]
-        self.wListChange =[0 for i in arr]
-        self.wListChangeCount =  [0 for i in arr]
+        arr0 = [0.0 for i in arr]
+        self.wListChange = np.array(arr0)
+        self.wListChangeCount =  arr0
+        WeightPool.finalWeightChange[self.layer][self.id] = arr0
+        print(WeightPool.finalWeightChange)
     def CalcThisNeural(self):
         self.z = np.dot(self.getPrevActivation(),self.wList) + self.bias
         self.val = mathFunction.TranslateActivationFunction(self.z,self.ActivationFunction)
@@ -60,25 +64,29 @@ class Neural:
     
     def AddDetltavalPerDeltaCost(self,x):
         self.DeltaValPerDeltaCost += x
-        self.DeltavalChangeCount += 1
 
     def CalcDeltaValPerDeltaCostAvg(self):
-        self.DeltaValPerDeltaCost /= self.DeltavalChangeCount
+        #self.DeltaValPerDeltaCost /= self.DeltavalChangeCount
         self.DeltavalChangeCount = 0
         
     
     #Add bias change
     def AddBiasChange(self,x):
-        if (self.layer == 3 and self.id == 0):
-            pass
-        self.biasChange += x
-        self.biasChangeCount+= 1
+            self.biasChange += x
+            self.biasChangeCount+= 1
     def AddWeightChange(self,index,x):
-        self.wListChange[index] += x
-        self.wListChangeCount[index] += 1
+            self.wListChange[index] += x
+            self.wListChangeCount[index] += 1
     
     # Average
     def WeightAvg(self):
+
+
+        if (WeightPool.UsingMutilProcess == True):
+            for weightChangeiD in range(len(self.wListChange)):
+                WeightPool.finalWeightChange[self.layer][self.id][weightChangeiD] = NeuralNetwork.learningRate  * self.wListChange[weightChangeiD] / self.wListChangeCount[weightChangeiD]
+            WeightPool.finalBiasChange[self.layer][self.id] = NeuralNetwork.learningRate * self.biasChange / self.biasChangeCount 
+            return
         #weight avg
         for weightChangeiD in range(len(self.wListChange)):
            self.wList[weightChangeiD] -= NeuralNetwork.learningRate  * self.wListChange[weightChangeiD] / self.wListChangeCount[weightChangeiD]
