@@ -56,8 +56,9 @@ for testSo in range(0,10):
     print(f"Tỉ lệ chính xác của số {testSo} là : {correct / len(datasetTest[testSo]) * 100}%" )
 print(f"Tong ti le {allcorrect / all * 100} % ")
 print("Confusion matrix:")
+
 print(confusionMatrix)
-print(all)
+
 
 #Predict an img
 
