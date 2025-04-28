@@ -4,7 +4,7 @@ from PIL import Image
 
 def load_handwritten_digits_dataset(folder_path, image_size=(32, 32), max_images=300):
     dataset = {}
-
+    datasetTest = {}
     # Loop through each digit folder
     for digit in sorted(os.listdir(folder_path)):
         digit_path = os.path.join(folder_path, digit)
@@ -16,7 +16,7 @@ def load_handwritten_digits_dataset(folder_path, image_size=(32, 32), max_images
         files = sorted(os.listdir(digit_path))
         image_files = [f for f in files if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
 
-        for i, filename in enumerate(image_files[:max_images]):
+        for i, filename in enumerate(image_files[:int(max_images * 0.7)]):
             try:
                 img_path = os.path.join(digit_path, filename)
                 with Image.open(img_path).convert("L") as img:  # convert to grayscale
@@ -27,8 +27,19 @@ def load_handwritten_digits_dataset(folder_path, image_size=(32, 32), max_images
                 print(f"Failed to load {filename} in digit {digit}: {e}")
 
         dataset[int(digit)] = images
+        images = []
+        for i, filename in enumerate(image_files[int(max_images * 0.7):max_images]):
+            try:
+                img_path = os.path.join(digit_path, filename)
+                with Image.open(img_path).convert("L") as img:  # convert to grayscale
+                    resized_img = img.resize(image_size)
+                    img_array = np.array(resized_img)
+                    images.append(img_array)
+            except Exception as e:
+                print(f"Failed to load {filename} in digit {digit}: {e}")
 
-    return dataset
+        datasetTest[int(digit)] = images
+    return {0 : dataset , 1 : datasetTest}
 
 
 # Example usage:
@@ -52,8 +63,6 @@ def divBatch(numberOfBatch,dataset):
         OneBatchArr = []
         print(min((i + 1) * batchSize,len(dataset)) - i * batchSize)
         for j in range(i * batchSize,min((i + 1) * batchSize,len(dataset))):
-            if (i == 11):
-                pass
             OneBatchArr.append(dataset[j])
         res.append(OneBatchArr)
     return res
@@ -72,6 +81,7 @@ def OpenIamgeAsFlatten(path):
     img = img.resize((32,32))
     ImagArr = np.array(img) 
     return ImagArr.flatten() / 255.0
+
 import matplotlib.pyplot as plt 
 import matplotlib.image as mpimg
 class ImageLable:

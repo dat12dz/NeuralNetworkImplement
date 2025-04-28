@@ -42,7 +42,7 @@ class Neural:
         self.wListChange = np.array(arr0)
         self.wListChangeCount =  arr0
         WeightPool.finalWeightChange[self.layer][self.id] = arr0
-        print(WeightPool.finalWeightChange)
+       
     def CalcThisNeural(self):
         self.z = np.dot(self.getPrevActivation(),self.wList) + self.bias
         self.val = mathFunction.TranslateActivationFunction(self.z,self.ActivationFunction)

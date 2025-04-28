@@ -4,8 +4,8 @@ from NeuralNetworkBase import NeuralNetworkBase
 import WeightPool
 import NeuralConst
 import numpy as np
-import WeightPool
-learningRate = 0.04
+
+learningRate = 0.06
 class NeuralNetwork(NeuralNetworkBase):
     #init class với mảng độ dài cuiar layer
     def __init__(self,LayerLengthList : list[float],activation):
